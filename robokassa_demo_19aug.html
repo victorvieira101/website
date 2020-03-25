@@ -1,0 +1,421 @@
+
+ 
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<base href="https://my.robokassa.ru/">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<title>Личный кабинет</title>
+<link href="/Content/Site.min.css?1-7.css" rel="stylesheet" type="text/css" />
+<link href="/Content/jquery-ui.min.css?1-7.css" rel="stylesheet" type="text/css" />
+<link href="/Content/selectbox.min.css?1-7.css" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript" src="/Scripts/jquery-1.8.2.min.js?1-7"></script>
+<script type="text/javascript" src="/Scripts/jquery-ui-1.10.2.min.js?1-7"></script>
+<script type="text/javascript" src="/Scripts/jquery.autosize.min.js?1-7"></script>
+<script type="text/javascript" src="/Scripts/jquery.placeholder.min.js?1-7"></script>
+<script type="text/javascript" src="/Scripts/jquery.ui.datepicker-ru.min.js?1-7"></script>
+<script type="text/javascript" src="/Scripts/jquery.ui.combobox.min.js?1-7"></script>
+<script type="text/javascript" src="/Scripts/hint.min.js?1-7"></script>
+<script type="text/javascript" src="/Scripts/selectbox.min.js?1-7"></script>
+<script type="text/javascript" src="/Scripts/Validation.min.js?1-7"></script>
+<script type="text/javascript" src="/Scripts/jquery.maskedinput-1.3.min.js?1-7"></script>
+
+<link rel="icon" href="/favicon.ico" type="image/x-icon" /> 
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+
+<script type="text/javascript">
+
+	(function($){
+		$.fn.extend({
+			center: function () {
+				return this.each(function() {
+					var top = ($(window).height() - $(this).outerHeight()) / 2;
+					var left = ($(window).width() - $(this).outerWidth()) / 2;
+					$(this).css({position:'absolute', margin:0, top: (top > 0 ? top : 0)+'px', left: (left > 0 ? left : 0)+'px'});
+				});
+			}
+		}); 
+	})(jQuery);
+
+
+	$(document).ready(function () {
+		$("input[placeholder], textarea[placeholder]").placeholder();
+		$(".datePicker").datepicker({ firstDay: 1, dateFormat: 'dd.mm.yy',
+			showOtherMonths: true, selectOtherMonths: true, showButtonPanel: true,
+			buttonImage: "/Content/images/calendar2.png", showOn: "both" });
+
+		$("#mainmenu > a").each(function() {
+
+			$(this).click(function(e) {                                
+				if ($(this).next().is('b')) {                    
+					$(this).next().find('ul').show();
+					return false;
+				}
+			});
+
+			if ($(this).attr("pid") == 'Operations_Index') {
+				$(this).addClass("sel");
+				if ($(this).next().is('b'))
+					$(this).next().addClass("sel");
+			}
+		});
+
+		$("#mainmenu > b").each(function() {
+			$(this).click(function(e) {
+				$(this).find('ul').show();
+				e.stopPropagation();
+			});
+				
+			$(this).find('li > a').each(function() {
+				if ($(this).attr("pid") == 'Operations_Index') {
+					var sub = $(this).parent().parent().parent();
+					sub.addClass("sel");
+					sub.prev().addClass("sel");
+				}
+			});
+		});
+
+		$('html').click(function() {
+			$("#mainmenu > b").each(function() {
+				var submenu = $(this).find('ul');
+				if (submenu != null && submenu.is(':visible')) {
+					submenu.hide();
+				}
+			});
+		});
+
+		//$('textarea').autosize();
+
+	});
+</script>
+
+<!--[if IE 7]> 
+<style type="text/css">
+#profile-cont input.xbutton  {
+	cursor: pointer; 
+	margin-left: -30px; 
+	margin-top: 10px; 
+	margin-bottom: 4px; 
+	}
+.buttonline a  {
+	margin-bottom: 5px;
+	line-height: 25px;
+}
+</style>
+<![endif]-->
+<style type="text/css">
+#shadow 
+{
+	display: block; z-index: 1;
+	background-image: url(/Content/images/shadow.png); background-repeat: repeat;
+	position:absolute; 
+	top:0; 
+	left:0;
+	width:100%;
+	height:100%;
+}
+
+#main1 {
+	background-image: none !important;
+	}
+	#content_box {
+width: 100%  !important;
+padding: 0  !important;
+</style>
+
+  
+<link href="/Content/SiteOperations.min.css?1-7.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="https://vkontakte.ru/js/api/share.js?9" charset="windows-1251"></script>
+<script type="text/javascript" src='https://connect.facebook.net/ru_RU/all.js'></script>
+<script type="text/javascript" src="/Scripts/operations.min.js?1-7"></script>
+<script type="text/javascript">
+
+var messages = {
+	PaymentDescription: "Мой платеж с помощью ROBOKASSA",
+	PleaseWait: "Пожалуйста, подождите, идет загрузка данных...",
+	LoadError: "Ошибка загрузки данных",
+	OperationOrder: "№ заказа",
+	ShareButton: "Поделиться",
+	VKShareImg: "/Content/images/ic-vkontakte.png",
+	FBShareImg: "/Content/images/ic-facebook.png",
+	cal: { month: ['ЯНВАРЬ', 'ФЕВРАЛЬ', 'МАРТ', 'АПРЕЛЬ', 'МАЙ', 'ИЮНЬ', 'ИЮЛЬ', 'АВГУСТ', 'СЕНТЯБРЬ', 'ОКТЯБРЬ', 'НОЯБРЬ', 'ДЕКАБРЬ'], day: ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'] }
+};
+
+var urls = {
+	Empty: "https://my.robokassa.ru/Home/Empty",
+	Details: "/Operations/GetDetails",
+	SupportHistory: "/Operations/GetSupportHistory",
+	List: "/Operations/OperationList"
+};
+
+$(document).ready(function ()
+{
+	opPageInit();
+	calInit({"20100409": true,"20100420": true,"20100606": true,"20110228": true,"20110301": true,"20110509": true,"20110527": true,"20110609": true,"20110726": true,"20111116": true,"20111119": true, "x": false});
+
+	$('#exportExcel').click(function ()
+	{
+		$("#Ready2Export").val('True');
+		resetPlaceholder(); // IE Bug
+		$(this).closest('form')[0].submit();
+		$("#Ready2Export").val('False');
+	});
+
+	FB.init({ appId: "424097947640041", status: true, cookie: true });
+});
+	
+</script>
+
+</head>
+<body>
+
+<div id="shadow" style="display:none"></div>
+
+<div id="content">
+
+
+
+<!-- /msg -->
+
+<div id="headline">
+<!-- top -->
+  <div class="logo"><img src="/Content/images/robo3.gif" width="102" height="18" align="absmiddle" /> &#8212; САМЫЙ УДОБНЫЙ СПОСОБ ОПЛАТЫ</div>
+  <div class="headline_right">
+	<a href="/default.aspx?culture=en" class="loginlang">EN</a>	
+	<a href="/default.aspx?culture=ru" class="selected_loginlang">RU</a>
+	<div class="rdot"></div>
+<a href="/Support">Поддержка</a>	<div class="rdot"></div>
+<a href="/Account/Logout">[Выйти]</a>	<a href="/Settings/Profile/" class="tmail">Eugene</a>
+  </div>
+<!-- /top -->
+</div>
+
+<div id="box1">
+  
+  <div id="header" class="border1">
+  <!-- menu -->
+	<div class="mar_title_pic"><img src="/Content/images/icon.gif" width="47" height="49" align="absmiddle" /></div><div class="mar_title">Мой магазин "Товары для животных"</div>
+	<div id="mainmenu">
+		<a class="new" href="/Showcase/Index/1" pid="Showcase_Index">Витрина</a>
+		<a href="/Home/Money" pid="Home_Money">Карты</a>
+		<a href="/Operations" pid="Operations_Index">Операции</a>
+
+		<a class="submenu" href="/Settings/Profile" pid="Settings_Profile">Настройки</a>
+		<b name="btnSubmenu" class="submenu2">&nbsp;
+			<ul style="display:none;">
+				<li><a href="/Settings/Profile" pid="Settings_Profile">Профиль</a></li>
+				<li><a href="/Settings/Access" pid="Settings_Access">Доступ</a></li>
+			</ul>
+		</b>
+	</div>
+  <!-- /menu -->
+  </div>
+
+  <div align="center" id="main1" class="border1">
+	<div id="content_box">
+	<!-- main -->
+		
+
+
+
+
+
+<div id="fb-root"></div>
+
+<div id="sup-box" align="center" style="display:none;">
+<form action="/Support/Query" method="post">	<a id="btnCloseSupport" href="#" class="sx" onclick='$("#sup-box").fadeOut();return false;'></a>
+	<div class="mar_title_pic"><img src="/Content/images/icon_support.gif" width="47" height="49" align="absmiddle" /></div>
+	<div class="mar_title">Служба поддержки</div>
+	<div style="clear: both;"></div>
+	<div class="content">
+		<div id="support-cont">
+			<table width="100%" cellpadding="0" cellspacing="0" class="stable">
+				<tr class="st-color">
+					<td>
+						<div class="s-select">Дата</div>
+					</td>
+					<td width="400">Описание операции</td>
+					<td>Сумма</td>
+					<td>
+						<nobr>Статус платежа</nobr>
+					</td>
+				</tr>
+				<tr>
+					<td id="supportDate"></td>
+					<td>
+						<div id="supportShop"></div>
+						<div id="supportOrder"></div>
+					</td>
+					<td nowrap="nowrap" id="supportSumm"></td>
+					<td>
+						<div id="supportStatus"></div>
+					</td>
+				</tr>
+			</table>
+
+			<h1>Ваш вопрос:</h1>
+			<textarea id="Message" name="Message" rows="5" cols="100%"></textarea>
+			<input type="hidden" id="OpKey" name="OpKey" value="" />
+			<input type="hidden" id="SelectedSubject" name="SelectedSubject" value="-1" />
+			<h1>Ваш email: <span class="small">(на него будет выслан ответ)</span></h1>
+			<select class="styled" id="SelectedEmail" name="SelectedEmail" style="width:300px"><option value="qetzal@gmail.com">qetzal@gmail.com</option>
+</select>
+			<div class="sbutline">
+				<div class="buttonline lfloat"><a id="btnSend" class="noact" href="#">Отправить</a></div>
+				<div class="cancel"><a id="btnCancel" href="#" onclick='$("#sup-box").fadeOut();return false;'>Отменить</a></div>
+			</div>
+			<br />
+			<div id="supportHistory" class="oplist">
+			</div>
+			<br />
+		</div>
+	</div>
+</form></div>
+
+<form name="flt" method="post">
+<table border="0" cellspacing="0" cellpadding="0" style="width:100%;">
+<tbody>
+<tr><td id="search_left">
+	<div id="cal" class="moded">
+		<div id="caltop">
+			<a id="calswd" class="caltab" href="#" onclick="calSwitch('d')">ДЕНЬ</a>
+			<a id="calswp" class="caltab" href="#" onclick="calSwitch('p')">ПЕРИОД</a>
+			<a class="calclose" href="#" onclick="calHide()"></a>
+		</div>
+		<div id="cal_line">&nbsp</div>
+		<div id="wrapper_cal">
+			<div id="calperiod">
+				с <input id="calfrom" name="DateFrom" type="text" size="8" onblur="calCheckDate(this)" onkeyup="if(event.which==13)calCheckDate(this)" /> 
+				по <input id="caltill" name="DateTill" type="text" size="8" onblur="calCheckDate(this)" onkeyup="if(event.which==13)calCheckDate(this)" />
+			</div>
+			<div id="calint"></div>
+			<div id="calinfd" class="calinf">просто нажмите на нужной дате<br /><br />дни, когда проводились какие-либо операции, выделены в календаре подчеркиванием</div>
+			<div id="calinfp" class="calinf">просто кликните по двум датам или впишите их в поля ввода и нажмите клавишу &laquo;ввод&raquo;<br /><br />дни, когда проводились какие-либо операции, выделены в календаре подчеркиванием</div>
+		</div>
+	</div>
+</td>
+<td>
+
+	<div style="clear: both;"><img src="/Content/images/space.gif" width="1" height="1" /></div>
+	
+	<input id="SortBy" name="SortBy" type="hidden" value="Date" />
+	<input id="SortByDesc" name="SortByDesc" type="hidden" value="True" />
+	<input id="PageCount" name="PageCount" type="hidden" value="1" />
+	<input id="CurrentPage" name="CurrentPage" type="hidden" value="1" />
+	<input id="Ready2Export" name="Ready2Export" type="hidden" value="False" />    
+	<input type="hidden" id="url_Operations_GetDetails" value="/Operations/GetDetails" />
+	
+
+
+	<div id="oplistContent">
+
+<script type='text/javascript'>//<![CDATA[ 
+window.onload=function(){
+ // Create IE + others compatible event handler
+    var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
+    var eventer = window[eventMethod];
+    var messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
+
+    // Listen to message from child window
+    eventer(messageEvent,function(e) {
+        $('#ecwid-frame').css('height', e.data.height + 'px');
+    },false);
+
+    $(document).ready(function(){
+              $('#ecwid-frame').css('height', '700px');
+
+        $('#ecwid-frame').attr('src', 'https://my.shop.robokassa.ru/cp/CP.html?lang=ru&inline');
+    });
+
+}//]]>  
+
+</script>
+
+
+      <div id="wrap">
+        <iframe seamless id="ecwid-frame" frameborder="0" width="100%" height="600" scrolling="no"></iframe>
+    </div>
+
+
+
+<div id="opfilter" style="width:100%;display:none;">
+	<div class="nav">
+			<a name="btnPage" href="#" class="prev">&lt;</a>
+					<a name="btnPage" href="#">1</a>
+			<a name="btnPage" href="#" class="next">&gt;</a>
+		</div>
+</div>
+<div id="altpager" style="display:none;">
+	<div style="float:right"><a href="#" onclick="clearFilter();">Вернуться ко всем операциям</a></div>
+	<div id="altpagerdates" style="display:none;">
+		<a href="#" onclick="calMovePeriod(-1);">Предыдущий период</a> &nbsp;&nbsp;
+		<a href="#" onclick="calMovePeriod(1);">Следующий период</a>
+	</div>
+</div>
+<!-- /oplist -->
+<input type="hidden" name="newPageCount" value="1" />
+<input type="hidden" name="newCurrentPage" value="1" />
+	</div>
+</td></tr>
+</tbody>
+</table>
+</form>
+	<!-- /main -->
+	</div>
+
+	<div id="copyright">&copy; Генеральная лицензия Банка России № 1697 от 19 июля 2007 г. &#169; 2007-2013 ОКЕАН БАНК (ЗАО), все права защищены</div>
+  </div>
+
+</div>
+
+<div id="footer">
+<!-- footer -->
+  <div id="pci_box">
+	<img src="/Content/images/logo_pci.gif" width="97" height="32" border="0" alt="" />
+	<div>Безопасность платежей гарантируется сертификатами THAWTE и PCI DSS.<br/>
+<a href="https://sealinfo.thawte.com/thawtesplash?form_file=fdf/thawtesplash.fdf&dn=auth.robokassa.ru&lang=en" target="_blank">Посмотреть сертификат подробнее.</a></div>
+  </div>
+
+  <div id="footermenu">
+	<a href="/Support">Обратная связь</a>
+	<div class="rdot"></div>
+	<a href="/Offers/Privacy" target="_blank">Политика конфиденциальности</a>
+	<div class="rdot"></div>
+	<a href="/Offers/Terms" target="_blank" >Договор-оферта</a>
+	
+  </div>
+<!-- /footer -->
+</div>
+
+</div>
+
+
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+	(function (d, w, c) {
+		(w[c] = w[c] || []).push(function () {
+			try {
+				w.yaCounter17048908 = new Ya.Metrika({ id: 17048908, enableAll: true, webvisor: true });
+			} catch (e) { }
+		});
+
+		var n = d.getElementsByTagName("script")[0],
+		s = d.createElement("script"),
+		f = function () { n.parentNode.insertBefore(s, n); };
+		s.type = "text/javascript";
+		s.async = true;
+		s.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//mc.yandex.ru/metrika/watch.js";
+
+		if (w.opera == "[object Opera]") {
+			d.addEventListener("DOMContentLoaded", f);
+		} else { f(); }
+	})(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="//mc.yandex.ru/watch/17048908" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+</body>
+</html>
+
